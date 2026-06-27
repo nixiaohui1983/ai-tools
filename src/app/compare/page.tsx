@@ -39,17 +39,6 @@ const capabilities = [
   { key: "seo", label: "SEO" },
 ];
 
-function CapabilityBar({ value, max }: { value: number; max: number }) {
-  const pct = max > 0 ? (value / max) * 100 : 0;
-  const color =
-    pct >= 80 ? "bg-green-500" : pct >= 50 ? "bg-yellow-500" : "bg-red-500";
-  return (
-    <div className="w-full h-2 rounded-full bg-gray-200 dark:bg-gray-700 overflow-hidden">
-      <div className={`h-full rounded-full ${color} transition-all duration-500`} style={{ width: `${pct}%` }} />
-    </div>
-  );
-}
-
 function RatingStars({ rating }: { rating: number }) {
   const full = Math.floor(rating);
   return (
