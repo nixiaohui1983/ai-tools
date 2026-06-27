@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo, useCallback, useRef } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import Link from "next/link";
 import { MagnifyingGlassIcon, FaceFrownIcon } from "@heroicons/react/24/outline";
 import { api } from "@/lib/api";

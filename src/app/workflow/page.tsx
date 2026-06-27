@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useCallback, useEffect } from "react";
-import type { Node, Edge } from "reactflow";
 import {
   PlusIcon,
   TrashIcon,
@@ -189,7 +188,8 @@ function WorkflowBuilderView({
   const [estimatedCost] = useState(workflowId ? 45 : undefined);
   const [showSaveSuccess, setShowSaveSuccess] = useState(false);
 
-  const handleCanvasChange = useCallback((_nodes: Node[], _edges: Edge[]) => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const handleCanvasChange = useCallback(() => {
     // Auto-save logic would go here (debounced API call)
   }, []);
 

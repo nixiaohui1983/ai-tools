@@ -5,13 +5,12 @@ import Link from "next/link";
 import {
   BookmarkIcon,
   HeartIcon,
-  ClockIcon,
   ArrowRightIcon,
   PlusIcon,
   TrashIcon,
   FaceFrownIcon,
 } from "@heroicons/react/24/outline";
-import { BookmarkIcon as BookmarkSolid, HeartIcon as HeartSolid } from "@heroicons/react/24/solid";
+import { HeartIcon as HeartSolid } from "@heroicons/react/24/solid";
 import { api } from "@/lib/api";
 import { CardSkeleton } from "@/components/ui/Skeleton";
 import { useToast } from "@/components/ui/Toast";

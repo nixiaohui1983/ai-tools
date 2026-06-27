@@ -2,12 +2,10 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { notFound } from "next/navigation";
 import {
   ArrowLeftIcon,
   StarIcon,
   GlobeAltIcon,
-  CheckBadgeIcon,
   SparklesIcon,
   FaceFrownIcon,
 } from "@heroicons/react/24/outline";

@@ -1,15 +1,11 @@
 "use client";
 
-import { useState } from "react";
 import { ToolGraph } from "@/components/graph";
-import { Input } from "@/components/ui";
 import type { ToolGraphNode } from "@/types";
 
 export default function ToolGraphPage() {
-  const [selectedNode, setSelectedNode] = useState<ToolGraphNode | null>(null);
-
   const handleNodeClick = (node: ToolGraphNode) => {
-    setSelectedNode(node);
+    console.log("Selected node:", node.id);
   };
 
   return (

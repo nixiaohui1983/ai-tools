@@ -70,7 +70,7 @@ export default function ComparePage() {
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [showPicker, setShowPicker] = useState(false);
-  const [comparison, setComparison] = useState<Record<string, any> | null>(null);
+  const [comparison, setComparison] = useState<{ tools: typeof selectedTools; matrix: Record<string, Record<string, number>> } | null>(null);
 
   const selectedTools = selectedIds
     .map((id) => allTools.find((t) => t.id === id))
@@ -96,7 +96,7 @@ export default function ComparePage() {
 
   const runComparison = () => {
     // Mock comparison data
-    const mockComparison: Record<string, any> = {
+    const mockComparison: { tools: typeof selectedTools; matrix: Record<string, Record<string, number>> } = {
       tools: selectedTools,
       matrix: {},
     };
