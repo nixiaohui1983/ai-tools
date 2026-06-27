@@ -44,7 +44,7 @@ export default function TaskLibraryPage() {
         const res = await api.tasks.list(params);
         setTasks(res.data?.tasks || []);
       } catch (err: unknown) {
-        toast.error(err?.message || "Failed to load tasks");
+        toast.error(err instanceof Error ? err.message : "Failed to load tasks");
       } finally {
         setLoading(false);
       }

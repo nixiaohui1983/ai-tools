@@ -46,7 +46,7 @@ export default function HomePage() {
         setWorkflows(wfRes.data?.workflows || []);
         setTasks(taskRes.data?.tasks || []);
       } catch (err: unknown) {
-        const msg = err?.message || "Failed to load data";
+        const msg = err instanceof Error ? err.message : "Failed to load data";
         setError(msg);
         toast.error(msg);
       } finally {

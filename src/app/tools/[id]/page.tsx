@@ -99,10 +99,10 @@ export default function ToolDetailPage({ params }: { params: { id: string } }) {
         }
         setTool(res.data);
       } catch (err: unknown) {
-        if (err?.message?.includes("404") || err?.message?.includes("not found")) {
+        if (err instanceof Error && (err.message.includes("404") || err.message.includes("not found"))) {
           setNotFoundError(true);
         } else {
-          toast.error(err?.message || "Failed to load tool details");
+          toast.error(err instanceof Error ? err.message : "Failed to load tool details");
         }
       } finally {
         setLoading(false);

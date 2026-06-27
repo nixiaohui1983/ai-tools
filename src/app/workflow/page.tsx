@@ -34,7 +34,7 @@ export default function WorkflowPage() {
         const res = await api.workflows.list();
         setWorkflows(res.data?.workflows || []);
       } catch (err: unknown) {
-        toast.error(err?.message || "Failed to load workflows");
+        toast.error(err instanceof Error ? err.message : "Failed to load workflows");
       } finally {
         setLoading(false);
       }

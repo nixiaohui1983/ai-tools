@@ -151,7 +151,7 @@ export default function ToolDirectoryPage() {
         const res = await api.tools.list();
         setTools(res.data?.tools || []);
       } catch (err: unknown) {
-        toast.error(err?.message || "Failed to load tools");
+        toast.error(err instanceof Error ? err.message : "Failed to load tools");
       } finally {
         setLoading(false);
       }

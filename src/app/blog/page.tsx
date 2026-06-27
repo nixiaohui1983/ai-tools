@@ -117,7 +117,7 @@ export default function BlogPage() {
         const res = await api.articles.list(params);
         setArticles(res.data?.articles || []);
       } catch (err: unknown) {
-        toast.error(err?.message || "Failed to load articles");
+        toast.error(err instanceof Error ? err.message : "Failed to load articles");
       } finally {
         setLoading(false);
       }

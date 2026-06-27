@@ -38,7 +38,7 @@ export default function DashboardPage() {
         setWorkflows(wfRes.data?.workflows || []);
         setTools(toolRes.data?.tools || []);
       } catch (err: unknown) {
-        toast.error(err?.message || "Failed to load dashboard data");
+        toast.error(err instanceof Error ? err.message : "Failed to load dashboard data");
       } finally {
         setLoading(false);
       }
