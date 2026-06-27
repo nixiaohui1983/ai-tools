@@ -112,7 +112,7 @@ export default function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
 
         setResults(items);
         setSelectedIndex(0);
-      } catch (err: any) {
+      } catch {
         toast.error("Search failed");
       } finally {
         setLoading(false);
@@ -121,6 +121,21 @@ export default function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
 
     return () => clearTimeout(timer);
   }, [query, toast]);
+
+  const navigateTo = useCallback((result: SearchResult) => {
+    onClose();
+    switch (result.type) {
+      case "tool":
+        router.push(`/tools/${result.id}`);
+        break;
+      case "task":
+        router.push(`/workflow?task=${result.id}`);
+        break;
+      case "workflow":
+        router.push(`/workflow/${result.id}`);
+        break;
+    }
+  }, [onClose, router]);
 
   // Keyboard navigation
   const handleKeyDown = useCallback(
@@ -140,23 +155,8 @@ export default function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
         onClose();
       }
     },
-    [results, selectedIndex, onClose]
+    [results, selectedIndex, onClose, navigateTo]
   );
-
-  const navigateTo = (result: SearchResult) => {
-    onClose();
-    switch (result.type) {
-      case "tool":
-        router.push(`/tools/${result.id}`);
-        break;
-      case "task":
-        router.push(`/workflow?task=${result.id}`);
-        break;
-      case "workflow":
-        router.push(`/workflow/${result.id}`);
-        break;
-    }
-  };
 
   if (!isOpen) return null;
 

@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import Image from "next/image";
 import { StarIcon, ArrowTrendingUpIcon } from "@heroicons/react/24/solid";
 import { twMerge } from "tailwind-merge";
 import Card, { CardHeader, CardTitle, CardDescription, CardFooter } from "../ui/Card";
@@ -36,7 +37,7 @@ export default function ToolCard({ tool, onClick, className, compact = false }: 
       >
         <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-primary-100 to-accent-100 dark:from-primary-900/50 dark:to-accent-900/50 flex items-center justify-center text-lg flex-shrink-0">
           {tool.logo ? (
-            <img src={tool.logo} alt={tool.name} className="w-6 h-6 rounded" />
+            <Image src={tool.logo} alt={tool.name} width={24} height={24} className="rounded" />
           ) : (
             tool.name.charAt(0)
           )}
@@ -58,7 +59,7 @@ export default function ToolCard({ tool, onClick, className, compact = false }: 
       <CardHeader>
         <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary-100 to-accent-100 dark:from-primary-900/40 dark:to-accent-900/40 flex items-center justify-center text-xl">
           {tool.logo ? (
-            <img src={tool.logo} alt={tool.name} className="w-8 h-8 rounded-lg" />
+            <Image src={tool.logo} alt={tool.name} width={32} height={32} className="rounded-lg" />
           ) : (
             tool.name.charAt(0)
           )}

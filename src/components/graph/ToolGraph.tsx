@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useEffect, useRef, useState, useCallback } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { twMerge } from "tailwind-merge";
-import type { ToolGraphData, ToolGraphNode, ToolDTO } from "@/types";
+import type { ToolGraphData, ToolGraphNode } from "@/types";
 import ToolDetail from "../tool/ToolDetail";
 
 interface ToolGraphProps {
@@ -51,10 +51,9 @@ type ViewMode = "graph" | "category" | "capability";
 
 export default function ToolGraph({ data, className, onNodeClick }: ToolGraphProps) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const cyRef = useRef<any>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [viewMode, setViewMode] = useState<ViewMode>("graph");
-  const [selectedTool, setSelectedTool] = useState<any>(null);
+  const [selectedTool, setSelectedTool] = useState<ToolGraphNode | null>(null);
   const [detailOpen, setDetailOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -98,18 +97,27 @@ export default function ToolGraph({ data, className, onNodeClick }: ToolGraphPro
     : graphData.nodes;
 
   const handleNodeClick = (node: ToolGraphNode) => {
-    setSelectedTool({
-      id: node.id,
-      name: node.name,
-      description: `A powerful ${node.category} tool`,
-      pricing: "freemium",
-      categories: [node.category],
-      capabilities: [node.category, "AI-powered"],
-      rating: 4.5,
-    });
+    setSelectedTool(node);
     setDetailOpen(true);
     onNodeClick?.(node);
   };
+
+  // Convert ToolGraphNode to ToolDTO for ToolDetail
+  const selectedToolDTO = selectedTool
+    ? {
+        id: selectedTool.id,
+        name: selectedTool.name,
+        description: `A powerful ${selectedTool.category} tool`,
+        pricing: "freemium" as const,
+        categories: [selectedTool.category],
+        capabilities: [selectedTool.category, "AI-powered"],
+        rating: 4.5,
+        pros: [],
+        cons: [],
+        createdAt: "",
+        updatedAt: "",
+      }
+    : null;
 
   return (
     <div className={twMerge("space-y-4", className)}>
@@ -312,7 +320,7 @@ export default function ToolGraph({ data, className, onNodeClick }: ToolGraphPro
 
       {/* Tool Detail Panel */}
       <ToolDetail
-        tool={selectedTool}
+        tool={selectedToolDTO}
         isOpen={detailOpen}
         onClose={() => {
           setDetailOpen(false);

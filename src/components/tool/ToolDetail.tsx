@@ -1,10 +1,10 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
+import Image from "next/image";
 import {
   XMarkIcon,
   GlobeAltIcon,
-  StarIcon,
   CheckCircleIcon,
   XCircleIcon,
 } from "@heroicons/react/24/outline";
@@ -28,8 +28,6 @@ export default function ToolDetail({
   onCompare,
   onAddToWorkflow,
 }: ToolDetailProps) {
-  const [showAll, setShowAll] = useState(false);
-
   if (!tool || !isOpen) return null;
 
   return (
@@ -56,7 +54,7 @@ export default function ToolDetail({
           <div className="flex items-center gap-4 mb-6">
             <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary-100 to-accent-100 dark:from-primary-900/50 dark:to-accent-900/50 flex items-center justify-center text-2xl font-bold">
               {tool.logo ? (
-                <img src={tool.logo} alt={tool.name} className="w-10 h-10 rounded-xl" />
+                <Image src={tool.logo} alt={tool.name} width={40} height={40} className="rounded-xl" />
               ) : (
                 tool.name.charAt(0)
               )}
