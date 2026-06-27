@@ -23,7 +23,7 @@ const pricingColors: Record<string, { label: string; variant: "success" | "warni
 };
 
 export default function ToolCard({ tool, onClick, className, compact = false }: ToolCardProps) {
-  const pricing = pricingColors[tool.pricing] || pricingColors.freemium;
+  const pricing = pricingColors[tool.pricing ?? "freemium"] || pricingColors.freemium;
 
   if (compact) {
     return (

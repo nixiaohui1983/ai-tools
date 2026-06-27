@@ -215,10 +215,10 @@ export default function ToolDetailPage({ params }: { params: { id: string } }) {
 
                   <span
                     className={`px-3 py-1 rounded-full text-xs font-medium ${
-                      pricingColors[tool.pricing] || pricingColors.freemium
+                      pricingColors[tool.pricing ?? "freemium"] || pricingColors.freemium
                     }`}
                   >
-                    {pricingLabels[tool.pricing] || tool.pricing}
+                    {pricingLabels[tool.pricing ?? "freemium"] || tool.pricing}
                     {tool.pricing === "subscription" && tool.price != null && ` · $${tool.price}/mo`}
                   </span>
 
@@ -371,7 +371,7 @@ export default function ToolDetailPage({ params }: { params: { id: string } }) {
               <div className="flex items-center justify-between">
                 <span className="text-sm text-text-secondary dark:text-gray-400">Pricing</span>
                 <span className="font-semibold text-text-primary dark:text-white capitalize">
-                  {pricingLabels[tool.pricing] || tool.pricing}
+                  {pricingLabels[tool.pricing ?? "freemium"] || tool.pricing}
                 </span>
               </div>
               {tool.price != null && (
