@@ -12,6 +12,8 @@ import ReactFlow, {
   Edge,
   Node,
   NodeTypes,
+  NodeChange,
+  EdgeChange,
   BackgroundVariant,
 } from "reactflow";
 import "reactflow/dist/style.css";
@@ -93,7 +95,7 @@ export default function WorkflowCanvas({
   );
 
   const handleNodesChange = useCallback(
-    (changes: any) => {
+    (changes: NodeChange[]) => {
       onNodesChange(changes);
       // Debounce would be better in production
       setTimeout(() => {
@@ -103,11 +105,11 @@ export default function WorkflowCanvas({
         });
       }, 100);
     },
-    [onNodesChange, edges, onChange]
+    [onNodesChange, setNodes, edges, onChange]
   );
 
   const handleEdgesChange = useCallback(
-    (changes: any) => {
+    (changes: EdgeChange[]) => {
       onEdgesChange(changes);
       setTimeout(() => {
         setEdges((currentEdges) => {
@@ -116,7 +118,7 @@ export default function WorkflowCanvas({
         });
       }, 100);
     },
-    [onEdgesChange, nodes, onChange]
+    [onEdgesChange, setEdges, nodes, onChange]
   );
 
   return (

@@ -1,5 +1,7 @@
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
 
+import type { WorkflowNode, WorkflowEdge, ToolGraphNode, ToolGraphEdge } from '@/types';
+
 async function fetchAPI<T>(path: string, options?: RequestInit): Promise<T> {
   const res = await fetch(`${BASE_URL}${path}`, {
     ...options,
@@ -54,9 +56,9 @@ export interface WorkflowDTO {
   name: string;
   slug: string;
   description?: string;
-  nodes: any[];
-  edges: any[];
-  tools?: any[];
+  nodes: WorkflowNode[];
+  edges: WorkflowEdge[];
+  tools?: ToolDTO[];
   estimatedCost?: number;
   estimatedTime?: number;
   timeSavedPct?: number;
@@ -103,17 +105,17 @@ export const api = {
     },
 
     get: async (id: string) => {
-      return fetchAPI<{ data: ToolDTO & { relationsAsSource: any[]; relationsAsTarget: any[]; workflows: any[] } }>(
+      return fetchAPI<{ data: ToolDTO & { relationsAsSource: ToolGraphNode[]; relationsAsTarget: ToolGraphNode[]; workflows: WorkflowDTO[] } }>(
         `/api/v1/tools/${id}`
       );
     },
 
     getAlternatives: async (id: string) => {
-      return fetchAPI<{ data: any[] }>(`/api/v1/tools/${id}/alternatives`);
+      return fetchAPI<{ data: ToolDTO[] }>(`/api/v1/tools/${id}/alternatives`);
     },
 
     getRelations: async (id: string) => {
-      return fetchAPI<{ data: { nodes: any[]; edges: any[] } }>(`/api/v1/tools/${id}/relations`);
+      return fetchAPI<{ data: { nodes: ToolGraphNode[]; edges: ToolGraphEdge[] } }>(`/api/v1/tools/${id}/relations`);
     },
   },
 
@@ -203,7 +205,7 @@ export const api = {
       );
     },
 
-    generateWorkflow: async (params: { taskId: string; preferences?: any }) => {
+    generateWorkflow: async (params: { taskId: string; preferences?: Record<string, unknown> }) => {
       return fetchAPI<{ data: WorkflowDTO }>(`/api/v1/decision/generate-workflow`, {
         method: 'POST',
         body: JSON.stringify(params),

@@ -52,8 +52,9 @@ export const useUserStore = create<UserState>()(
 
           const data = await response.json();
           set({ user: data.user, isAuthenticated: true, isLoading: false });
-        } catch (err: any) {
-          set({ error: err.message, isLoading: false });
+        } catch (err: unknown) {
+          const message = err instanceof Error ? err.message : "Login failed";
+          set({ error: message, isLoading: false });
           throw err;
         }
       },
