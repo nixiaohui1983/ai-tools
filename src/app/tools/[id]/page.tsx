@@ -17,6 +17,31 @@ import { CardSkeleton } from "@/components/ui/Skeleton";
 import { useToast } from "@/components/ui/Toast";
 import type { ToolDTO } from "@/lib/api";
 
+interface ToolRelation {
+  id?: string;
+  name?: string;
+  pricing?: string;
+  sourceId?: string;
+  toolId?: string;
+  tool?: { name?: string; pricing?: string };
+}
+
+interface ToolCapability {
+  id?: string;
+  name?: string;
+}
+
+interface WorkflowSummary {
+  id: string;
+  name: string;
+  tools?: ToolSummary[];
+}
+
+interface ToolSummary {
+  id?: string;
+  name?: string;
+}
+
 const categories = [
   "Writing", "Image", "Video", "Coding", "Marketing", "Productivity", "Research", "Automation",
 ];
@@ -61,7 +86,7 @@ function RatingStars({ rating }: { rating: number }) {
 
 export default function ToolDetailPage({ params }: { params: { id: string } }) {
   const { toast } = useToast();
-  const [tool, setTool] = useState<(ToolDTO & { relationsAsSource?: any[]; relationsAsTarget?: any[]; workflows?: any[] }) | null>(null);
+  const [tool, setTool] = useState<(ToolDTO & { relationsAsSource?: ToolRelation[]; relationsAsTarget?: ToolRelation[]; workflows?: WorkflowSummary[] }) | null>(null);
   const [loading, setLoading] = useState(true);
   const [notFoundError, setNotFoundError] = useState(false);
 
@@ -75,7 +100,7 @@ export default function ToolDetailPage({ params }: { params: { id: string } }) {
           return;
         }
         setTool(res.data);
-      } catch (err: any) {
+      } catch (err: unknown) {
         if (err?.message?.includes("404") || err?.message?.includes("not found")) {
           setNotFoundError(true);
         } else {
@@ -134,7 +159,7 @@ export default function ToolDetailPage({ params }: { params: { id: string } }) {
   if (!tool) return null;
 
   // Extract alternatives from relationsAsTarget (tools that are alternatives to this one)
-  const alternatives: any[] = (tool.relationsAsTarget || []).map((r: any) => ({
+  const alternatives = (tool.relationsAsTarget || []).map((r: ToolRelation) => ({
     id: r.id || r.sourceId || r.toolId,
     name: r.name || r.tool?.name || "Unknown",
     pricing: r.pricing || r.tool?.pricing || "freemium",
@@ -222,7 +247,7 @@ export default function ToolDetailPage({ params }: { params: { id: string } }) {
                 Capabilities
               </h2>
               <div className="flex flex-wrap gap-2">
-                {tool.capabilities.map((cap: any) => (
+                {tool.capabilities.map((cap: ToolCapability | string) => (
                   <span
                     key={typeof cap === "string" ? cap : cap.id || cap.name}
                     className="px-3 py-1.5 rounded-lg bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400 text-sm font-medium"
@@ -242,7 +267,7 @@ export default function ToolDetailPage({ params }: { params: { id: string } }) {
             </h2>
             {displayWorkflows.length > 0 ? (
               <div className="space-y-3">
-                {displayWorkflows.map((wf: any) => (
+                {displayWorkflows.map((wf: WorkflowSummary) => (
                   <Link
                     key={wf.id}
                     href={`/workflow/${wf.id}`}
@@ -253,7 +278,7 @@ export default function ToolDetailPage({ params }: { params: { id: string } }) {
                         {wf.name}
                       </h3>
                       <div className="flex flex-wrap gap-1 mt-1">
-                        {(wf.tools || []).slice(0, 4).map((t: any) => (
+                        {(wf.tools || []).slice(0, 4).map((t: ToolSummary | string) => (
                           <span
                             key={typeof t === "string" ? t : t.id || t.name}
                             className="px-2 py-0.5 text-xs rounded-full bg-gray-100 dark:bg-gray-700 text-text-secondary dark:text-gray-400"
@@ -300,7 +325,7 @@ export default function ToolDetailPage({ params }: { params: { id: string } }) {
           <div className="p-6 rounded-2xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
             <h3 className="font-semibold text-text-primary dark:text-white mb-4">Alternatives</h3>
             <div className="space-y-3">
-              {displayAlternatives.map((alt: any) => (
+              {displayAlternatives.map((alt) => (
                 <Link
                   key={alt.id}
                   href={`/tools/${alt.id}`}
@@ -327,7 +352,7 @@ export default function ToolDetailPage({ params }: { params: { id: string } }) {
 
             {displayAlternatives.length > 0 && (
               <Link
-                href={`/compare?tools=${displayAlternatives.map((a: any) => a.id).join(",")},${tool.id}`}
+                href={`/compare?tools=${displayAlternatives.map((a) => a.id).join(",")},${tool.id}`}
                 className="mt-4 w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400 text-sm font-medium hover:bg-primary-100 dark:hover:bg-primary-900/30 transition-colors"
               >
                 Compare Alternatives

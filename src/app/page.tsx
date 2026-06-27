@@ -45,7 +45,7 @@ export default function HomePage() {
         ]);
         setWorkflows(wfRes.data?.workflows || []);
         setTasks(taskRes.data?.tasks || []);
-      } catch (err: any) {
+      } catch (err: unknown) {
         const msg = err?.message || "Failed to load data";
         setError(msg);
         toast.error(msg);
@@ -162,7 +162,7 @@ export default function HomePage() {
                     {wf.name}
                   </h3>
                   <div className="flex flex-wrap gap-1 mb-4">
-                    {(wf.tools || []).slice(0, 3).map((tool: any) => (
+                    {(wf.tools || []).slice(0, 3).map((tool: { id?: string; name?: string } | string) => (
                       <span
                         key={typeof tool === "string" ? tool : tool.id || tool.name}
                         className="px-2 py-0.5 text-xs rounded-full bg-gray-100 dark:bg-gray-700 text-text-secondary dark:text-gray-300"

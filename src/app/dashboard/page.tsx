@@ -38,7 +38,7 @@ export default function DashboardPage() {
         ]);
         setWorkflows(wfRes.data?.workflows || []);
         setTools(toolRes.data?.tools || []);
-      } catch (err: any) {
+      } catch (err: unknown) {
         toast.error(err?.message || "Failed to load dashboard data");
       } finally {
         setLoading(false);
@@ -183,7 +183,7 @@ export default function DashboardPage() {
                                 )}
                               </div>
                               <div className="flex flex-wrap gap-1 mb-3">
-                                {(wf.tools || []).slice(0, 4).map((tool: any) => (
+                                {(wf.tools || []).slice(0, 4).map((tool: { id?: string; name?: string } | string) => (
                                   <span
                                     key={typeof tool === "string" ? tool : tool.id || tool.name}
                                     className="px-2 py-0.5 text-xs rounded-full bg-gray-100 dark:bg-gray-700 text-text-secondary dark:text-gray-400"

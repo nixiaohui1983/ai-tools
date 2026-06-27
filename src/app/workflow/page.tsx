@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useCallback, useEffect } from "react";
+import type { Node, Edge } from "reactflow";
 import {
   PlusIcon,
   TrashIcon,
@@ -33,7 +34,7 @@ export default function WorkflowPage() {
         setLoading(true);
         const res = await api.workflows.list();
         setWorkflows(res.data?.workflows || []);
-      } catch (err: any) {
+      } catch (err: unknown) {
         toast.error(err?.message || "Failed to load workflows");
       } finally {
         setLoading(false);
@@ -121,7 +122,7 @@ export default function WorkflowPage() {
               <CardDescription>{wf.description || "Custom AI workflow"}</CardDescription>
 
               <div className="flex flex-wrap gap-1.5 my-4">
-                {(wf.tools || []).slice(0, 5).map((tool: any) => (
+                {(wf.tools || []).slice(0, 5).map((tool: { id?: string; name?: string } | string) => (
                   <Badge key={typeof tool === "string" ? tool : tool.id || tool.name} variant="primary" size="sm">
                     {typeof tool === "string" ? tool : tool.name || tool.id}
                   </Badge>
@@ -181,15 +182,14 @@ function WorkflowBuilderView({
     workflowName,
     selectedNodeId,
     setWorkflowName,
-    setSelectedNodeId,
     resetWorkflow,
   } = useWorkflowStore();
 
-  const [estimatedTime, setEstimatedTime] = useState(workflowId ? 30 : undefined);
-  const [estimatedCost, setEstimatedCost] = useState(workflowId ? 45 : undefined);
+  const [estimatedTime] = useState(workflowId ? 30 : undefined);
+  const [estimatedCost] = useState(workflowId ? 45 : undefined);
   const [showSaveSuccess, setShowSaveSuccess] = useState(false);
 
-  const handleCanvasChange = useCallback((_nodes: any, _edges: any) => {
+  const handleCanvasChange = useCallback((_nodes: Node[], _edges: Edge[]) => {
     // Auto-save logic would go here (debounced API call)
   }, []);
 
