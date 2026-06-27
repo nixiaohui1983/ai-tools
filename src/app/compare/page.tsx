@@ -39,8 +39,6 @@ const capabilities = [
   { key: "seo", label: "SEO" },
 ];
 
-const pricingOrder = { free: 0, freemium: 1, subscription: 2, paid: 3 };
-
 function CapabilityBar({ value, max }: { value: number; max: number }) {
   const pct = max > 0 ? (value / max) * 100 : 0;
   const color =

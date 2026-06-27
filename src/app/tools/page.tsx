@@ -1,9 +1,20 @@
 "use client";
 
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo, useEffect } from "react";
 import Link from "next/link";
-import { MagnifyingGlassIcon, FunnelIcon, AdjustmentsHorizontalIcon } from "@heroicons/react/24/outline";
+import {
+  MagnifyingGlassIcon,
+  FunnelIcon,
+  AdjustmentsHorizontalIcon,
+  PlusIcon,
+  CheckIcon,
+  ScaleIcon,
+} from "@heroicons/react/24/outline";
 import { api } from "@/lib/api";
+import { CardSkeleton } from "@/components/ui/Skeleton";
+import { useToast } from "@/components/ui/Toast";
+import { useCompareStore } from "@/store";
+import type { ToolDTO } from "@/lib/api";
 
 const categories = [
   { key: "writing", label: "Writing" },
@@ -31,30 +42,6 @@ const sortOptions = [
   { key: "price-desc", label: "Price: High to Low" },
 ];
 
-interface Tool {
-  id: string;
-  name: string;
-  description: string;
-  logo?: string;
-  pricing?: string;
-  price?: number;
-  rating?: number;
-  categories: string[];
-  featured: boolean;
-}
-
-// Mock data for initial display
-const mockTools: Tool[] = [
-  { id: "1", name: "ChatGPT", description: "AI language model for writing, coding, and more", pricing: "freemium", rating: 4.9, categories: ["writing", "coding"], featured: true },
-  { id: "2", name: "Midjourney", description: "AI image generation from text prompts", pricing: "subscription", rating: 4.8, categories: ["image"], featured: true },
-  { id: "3", name: "GitHub Copilot", description: "AI-powered code completion and chat", pricing: "subscription", rating: 4.7, categories: ["coding"], featured: false },
-  { id: "4", name: "Perplexity", description: "AI search engine with cited sources", pricing: "freemium", rating: 4.6, categories: ["research"], featured: true },
-  { id: "5", name: "Jasper", description: "AI writing assistant for marketing teams", pricing: "subscription", rating: 4.5, categories: ["writing", "marketing"], featured: false },
-  { id: "6", name: "Runway", description: "AI video editing and generation platform", pricing: "freemium", rating: 4.5, categories: ["video"], featured: true },
-  { id: "7", name: "Notion AI", description: "AI-powered workspace and note-taking", pricing: "freemium", rating: 4.4, categories: ["productivity", "writing"], featured: false },
-  { id: "8", name: "Claude", description: "Constitutional AI assistant by Anthropic", pricing: "freemium", rating: 4.8, categories: ["writing", "analysis"], featured: true },
-];
-
 const pricingColors: Record<string, string> = {
   free: "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400",
   freemium: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400",
@@ -62,20 +49,43 @@ const pricingColors: Record<string, string> = {
   paid: "bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300",
 };
 
-function ToolCard({ tool }: { tool: Tool }) {
+function ToolCard({ tool }: { tool: ToolDTO }) {
+  const { toolIds, toggleTool } = useCompareStore();
+  const isSelected = toolIds.includes(tool.id);
+
   return (
-    <Link href={`/tools/${tool.id}`} className="group block">
-      <div className="p-5 rounded-2xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 card-hover h-full">
+    <div className="group relative p-5 rounded-2xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 card-hover h-full">
+      {/* Compare button */}
+      <button
+        onClick={(e) => {
+          e.preventDefault();
+          toggleTool(tool.id);
+        }}
+        className={`absolute top-3 right-3 p-1.5 rounded-lg transition-all z-10 ${
+          isSelected
+            ? "bg-primary-500 text-white shadow-md"
+            : "bg-gray-100 dark:bg-gray-700 text-gray-400 hover:text-primary-500 opacity-0 group-hover:opacity-100"
+        }`}
+        title={isSelected ? "Remove from compare" : "Add to compare"}
+      >
+        {isSelected ? (
+          <CheckIcon className="w-4 h-4" />
+        ) : (
+          <PlusIcon className="w-4 h-4" />
+        )}
+      </button>
+
+      <Link href={`/tools/${tool.id}`} className="block">
         <div className="flex items-center gap-3 mb-3">
           <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-primary-500 to-accent-400 flex items-center justify-center text-white font-bold shadow-lg shadow-primary-500/25">
             {tool.name[0]}
           </div>
-          <div className="flex-1 min-w-0">
+          <div className="flex-1 min-w-0 pr-6">
             <h3 className="font-semibold text-text-primary dark:text-white group-hover:text-primary-500 transition-colors truncate">
               {tool.name}
             </h3>
             <div className="flex items-center gap-1 mt-0.5">
-              {tool.rating && (
+              {tool.rating != null && (
                 <span className="text-xs text-yellow-600 dark:text-yellow-400">
                   ⭐ {tool.rating}
                 </span>
@@ -116,25 +126,46 @@ function ToolCard({ tool }: { tool: Tool }) {
             View →
           </span>
         </div>
-      </div>
-    </Link>
+      </Link>
+    </div>
   );
 }
 
 export default function ToolDirectoryPage() {
+  const { toast } = useToast();
+  const { toolIds, clearAll } = useCompareStore();
+
+  const [tools, setTools] = useState<ToolDTO[]>([]);
+  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [selectedPricing, setSelectedPricing] = useState<string | null>(null);
   const [sortBy, setSortBy] = useState("featured");
   const [showFilters, setShowFilters] = useState(false);
 
-  // Filter and sort tools client-side (mock data)
+  // Fetch tools from API
+  useEffect(() => {
+    async function fetchTools() {
+      try {
+        setLoading(true);
+        const res = await api.tools.list();
+        setTools(res.data?.tools || []);
+      } catch (err: any) {
+        toast.error(err?.message || "Failed to load tools");
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchTools();
+  }, [toast]);
+
+  // Filter and sort tools client-side
   const filteredTools = useMemo(() => {
-    let tools = [...mockTools];
+    let result = [...tools];
 
     if (search) {
       const q = search.toLowerCase();
-      tools = tools.filter(
+      result = result.filter(
         (t) =>
           t.name.toLowerCase().includes(q) ||
           t.description.toLowerCase().includes(q) ||
@@ -143,29 +174,34 @@ export default function ToolDirectoryPage() {
     }
 
     if (selectedCategory) {
-      tools = tools.filter((t) => t.categories.includes(selectedCategory));
+      result = result.filter((t) => t.categories.includes(selectedCategory));
     }
 
     if (selectedPricing) {
-      tools = tools.filter((t) => t.pricing === selectedPricing);
+      result = result.filter((t) => t.pricing === selectedPricing);
     }
 
-    // Sort
     switch (sortBy) {
       case "rating":
-        tools.sort((a, b) => (b.rating || 0) - (a.rating || 0));
+        result.sort((a, b) => (b.rating || 0) - (a.rating || 0));
         break;
       case "name":
-        tools.sort((a, b) => a.name.localeCompare(b.name));
+        result.sort((a, b) => a.name.localeCompare(b.name));
+        break;
+      case "price-asc":
+        result.sort((a, b) => (a.price || 0) - (b.price || 0));
+        break;
+      case "price-desc":
+        result.sort((a, b) => (b.price || 0) - (a.price || 0));
         break;
       case "featured":
       default:
-        tools.sort((a, b) => (b.featured ? 1 : 0) - (a.featured ? 1 : 0));
+        result.sort((a, b) => (b.featured ? 1 : 0) - (a.featured ? 1 : 0));
         break;
     }
 
-    return tools;
-  }, [search, selectedCategory, selectedPricing, sortBy]);
+    return result;
+  }, [tools, search, selectedCategory, selectedPricing, sortBy]);
 
   const clearFilters = useCallback(() => {
     setSearch("");
@@ -184,13 +220,39 @@ export default function ToolDirectoryPage() {
           Tool Directory
         </h1>
         <p className="text-text-secondary dark:text-gray-400">
-          Discover and compare {mockTools.length}+ AI tools for every use case
+          Discover and compare {tools.length}+ AI tools for every use case
         </p>
       </div>
 
+      {/* Compare bar */}
+      {toolIds.length > 0 && (
+        <div className="mb-6 p-4 rounded-2xl bg-primary-50 dark:bg-primary-900/20 border border-primary-200 dark:border-primary-800 flex items-center justify-between animate-fade-in">
+          <div className="flex items-center gap-3">
+            <ScaleIcon className="w-5 h-5 text-primary-500" />
+            <span className="text-sm font-medium text-primary-700 dark:text-primary-300">
+              {toolIds.length} tool{toolIds.length > 1 ? "s" : ""} selected for comparison
+              {toolIds.length >= 4 ? " (max 4)" : ""}
+            </span>
+          </div>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={clearAll}
+              className="text-xs text-text-secondary dark:text-gray-400 hover:text-red-500 transition-colors"
+            >
+              Clear all
+            </button>
+            <Link
+              href={`/compare?tools=${toolIds.join(",")}`}
+              className="px-4 py-1.5 rounded-lg bg-primary-500 text-white text-sm font-medium hover:bg-primary-600 transition-colors"
+            >
+              Compare
+            </Link>
+          </div>
+        </div>
+      )}
+
       {/* Search + Filter Bar */}
       <div className="flex flex-col gap-4 mb-8">
-        {/* Search */}
         <div className="relative flex-1">
           <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
           <input
@@ -202,7 +264,6 @@ export default function ToolDirectoryPage() {
           />
         </div>
 
-        {/* Filter Controls */}
         <div className="flex items-center gap-3 flex-wrap">
           <button
             onClick={() => setShowFilters(!showFilters)}
@@ -221,7 +282,6 @@ export default function ToolDirectoryPage() {
             )}
           </button>
 
-          {/* Sort */}
           <div className="flex items-center gap-2 ml-auto">
             <AdjustmentsHorizontalIcon className="w-4 h-4 text-gray-400" />
             <select
@@ -247,21 +307,15 @@ export default function ToolDirectoryPage() {
           )}
         </div>
 
-        {/* Expanded Filters */}
         {showFilters && (
           <div className="p-5 rounded-2xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 animate-fade-in">
-            {/* Category Filter */}
             <div className="mb-5">
-              <h3 className="text-sm font-semibold text-text-primary dark:text-white mb-3">
-                Category
-              </h3>
+              <h3 className="text-sm font-semibold text-text-primary dark:text-white mb-3">Category</h3>
               <div className="flex flex-wrap gap-2">
                 {categories.map((cat) => (
                   <button
                     key={cat.key}
-                    onClick={() =>
-                      setSelectedCategory((prev) => (prev === cat.key ? null : cat.key))
-                    }
+                    onClick={() => setSelectedCategory((prev) => (prev === cat.key ? null : cat.key))}
                     className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-all ${
                       selectedCategory === cat.key
                         ? "border-primary-500 bg-primary-500 text-white"
@@ -274,18 +328,13 @@ export default function ToolDirectoryPage() {
               </div>
             </div>
 
-            {/* Pricing Filter */}
             <div>
-              <h3 className="text-sm font-semibold text-text-primary dark:text-white mb-3">
-                Pricing
-              </h3>
+              <h3 className="text-sm font-semibold text-text-primary dark:text-white mb-3">Pricing</h3>
               <div className="flex flex-wrap gap-2">
                 {pricingFilters.map((p) => (
                   <button
                     key={p.key}
-                    onClick={() =>
-                      setSelectedPricing((prev) => (prev === p.key ? null : p.key))
-                    }
+                    onClick={() => setSelectedPricing((prev) => (prev === p.key ? null : p.key))}
                     className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-all ${
                       selectedPricing === p.key
                         ? "border-primary-500 bg-primary-500 text-white"
@@ -309,8 +358,14 @@ export default function ToolDirectoryPage() {
       </div>
 
       {/* Tool Grid */}
-      {filteredTools.length > 0 ? (
+      {loading ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {Array.from({ length: 8 }).map((_, i) => (
+            <CardSkeleton key={i} />
+          ))}
+        </div>
+      ) : filteredTools.length > 0 ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 animate-fade-in">
           {filteredTools.map((tool) => (
             <ToolCard key={tool.id} tool={tool} />
           ))}

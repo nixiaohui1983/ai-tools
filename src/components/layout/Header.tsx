@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -9,16 +9,27 @@ import {
   Bars3Icon,
   XMarkIcon,
 } from "@heroicons/react/24/outline";
+import { useTheme } from "@/components/ThemeProvider";
+import SearchOverlay from "@/components/search/SearchOverlay";
 
 export default function Header() {
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [darkMode, setDarkMode] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const { theme, toggleTheme } = useTheme();
+  const isDark = theme === "dark";
 
-  const toggleDarkMode = () => {
-    setDarkMode(!darkMode);
-    document.documentElement.classList.toggle("dark");
-  };
+  // Cmd+K / Ctrl+K shortcut
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === "k") {
+        e.preventDefault();
+        setSearchOpen(true);
+      }
+    };
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, []);
 
   const navLinks = [
     { href: "/tasks", label: "Tasks" },
@@ -62,28 +73,38 @@ export default function Header() {
           {/* Right side */}
           <div className="flex items-center gap-3">
             {/* Search */}
-            <button className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+            <button
+              onClick={() => setSearchOpen(true)}
+              className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+              title="Search (Cmd+K)"
+            >
               <MagnifyingGlassIcon className="w-5 h-5 text-text-secondary dark:text-gray-300" />
             </button>
 
+            <SearchOverlay isOpen={searchOpen} onClose={() => setSearchOpen(false)} />
+
             {/* Dark mode toggle */}
             <button
-              onClick={toggleDarkMode}
+              onClick={toggleTheme}
+              aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
               className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
             >
-              {darkMode ? (
-                <svg className="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+              <svg
+                className="w-5 h-5 text-gray-600 dark:text-yellow-400 transition-transform duration-500 ease-in-out"
+                style={{ transform: isDark ? "rotate(180deg)" : "rotate(0deg)" }}
+                fill="currentColor"
+                viewBox="0 0 20 20"
+              >
+                {isDark ? (
                   <path
                     fillRule="evenodd"
                     d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 11-2 0 1 1 0 012 0zM5.05 14.464A1 1 0 106.464 13.05l-.707-.707a1 1 0 00-1.414 1.414l.707.707zm-.464-7.07a1 1 0 100 1.414l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 0zM3 11a1 1 0 10-2 0 1 1 0 012 0z"
                     clipRule="evenodd"
                   />
-                </svg>
-              ) : (
-                <svg className="w-5 h-5 text-gray-600" fill="currentColor" viewBox="0 0 20 20">
+                ) : (
                   <path d="M17.293 13.303A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" />
-                </svg>
-              )}
+                )}
+              </svg>
             </button>
 
             {/* Sign In */}
