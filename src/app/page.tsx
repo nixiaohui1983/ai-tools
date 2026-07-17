@@ -8,7 +8,7 @@ import {
   ClockIcon,
   ChartBarIcon,
 } from "@heroicons/react/24/outline";
-import { api } from "@/lib/api";
+import { api, workflowToolName } from "@/lib/api";
 import { CardSkeleton } from "@/components/ui/Skeleton";
 import { useToast } from "@/components/ui/Toast";
 import type { WorkflowDTO, TaskDTO } from "@/lib/api";
@@ -162,12 +162,12 @@ export default function HomePage() {
                     {wf.name}
                   </h3>
                   <div className="flex flex-wrap gap-1 mb-4">
-                    {(wf.tools || []).slice(0, 3).map((tool: { id?: string; name?: string } | string) => (
+                    {(wf.tools || []).slice(0, 3).map((tool, i) => (
                       <span
-                        key={typeof tool === "string" ? tool : tool.id || tool.name}
+                        key={`${workflowToolName(tool)}-${i}`}
                         className="px-2 py-0.5 text-xs rounded-full bg-gray-100 dark:bg-gray-700 text-text-secondary dark:text-gray-300"
                       >
-                        {typeof tool === "string" ? tool : tool.name || tool.id}
+                        {workflowToolName(tool)}
                       </span>
                     ))}
                   </div>

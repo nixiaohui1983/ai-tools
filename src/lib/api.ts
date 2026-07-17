@@ -51,6 +51,14 @@ export interface TaskDTO {
   featured: boolean;
 }
 
+// Workflow tools come from the `workflowTool` join table as `{ id, toolId, order, tool: ToolDTO }`.
+export type WorkflowToolItem = {
+  id?: string;
+  toolId?: string;
+  order?: number;
+  tool?: ToolDTO;
+} & Partial<ToolDTO>;
+
 export interface WorkflowDTO {
   id: string;
   name: string;
@@ -58,13 +66,22 @@ export interface WorkflowDTO {
   description?: string;
   nodes: WorkflowNode[];
   edges: WorkflowEdge[];
-  tools?: ToolDTO[];
+  tools?: WorkflowToolItem[];
   estimatedCost?: number;
   estimatedTime?: number;
   timeSavedPct?: number;
   isTemplate: boolean;
   isPublic: boolean;
   featured: boolean;
+}
+
+// Extract a human-readable tool name whether the item is a join row or a plain ToolDTO.
+export function workflowToolName(t: WorkflowToolItem | string | undefined): string {
+  if (!t) return "";
+  if (typeof t === "string") return t;
+  if (t.name) return t.name;
+  if (t.tool?.name) return t.tool.name;
+  return t.id || t.tool?.id || "";
 }
 
 export interface ArticleDTO {

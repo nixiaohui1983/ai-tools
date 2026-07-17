@@ -11,7 +11,7 @@ import {
   FaceFrownIcon,
 } from "@heroicons/react/24/outline";
 import { HeartIcon as HeartSolid } from "@heroicons/react/24/solid";
-import { api } from "@/lib/api";
+import { api, workflowToolName } from "@/lib/api";
 import { CardSkeleton } from "@/components/ui/Skeleton";
 import { useToast } from "@/components/ui/Toast";
 import { useUserStore } from "@/store";
@@ -182,12 +182,12 @@ export default function DashboardPage() {
                                 )}
                               </div>
                               <div className="flex flex-wrap gap-1 mb-3">
-                                {(wf.tools || []).slice(0, 4).map((tool: { id?: string; name?: string } | string) => (
+                                {(wf.tools || []).slice(0, 4).map((tool, i) => (
                                   <span
-                                    key={typeof tool === "string" ? tool : tool.id || tool.name}
+                                    key={`${workflowToolName(tool)}-${i}`}
                                     className="px-2 py-0.5 text-xs rounded-full bg-gray-100 dark:bg-gray-700 text-text-secondary dark:text-gray-400"
                                   >
-                                    {typeof tool === "string" ? tool : tool.name || tool.id}
+                                    {workflowToolName(tool)}
                                   </span>
                                 ))}
                               </div>

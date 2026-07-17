@@ -10,7 +10,7 @@ import {
   FaceFrownIcon,
 } from "@heroicons/react/24/outline";
 import { StarIcon as StarSolid } from "@heroicons/react/24/solid";
-import { api } from "@/lib/api";
+import { api, workflowToolName } from "@/lib/api";
 import { CardSkeleton } from "@/components/ui/Skeleton";
 import { useToast } from "@/components/ui/Toast";
 import type { ToolDTO } from "@/lib/api";
@@ -276,12 +276,12 @@ export default function ToolDetailPage({ params }: { params: { id: string } }) {
                         {wf.name}
                       </h3>
                       <div className="flex flex-wrap gap-1 mt-1">
-                        {(wf.tools || []).slice(0, 4).map((t: ToolSummary | string) => (
+                        {(wf.tools || []).slice(0, 4).map((t, i) => (
                           <span
-                            key={typeof t === "string" ? t : t.id || t.name}
+                            key={`${workflowToolName(t)}-${i}`}
                             className="px-2 py-0.5 text-xs rounded-full bg-gray-100 dark:bg-gray-700 text-text-secondary dark:text-gray-400"
                           >
-                            {typeof t === "string" ? t : t.name || t.id}
+                            {workflowToolName(t)}
                           </span>
                         ))}
                       </div>

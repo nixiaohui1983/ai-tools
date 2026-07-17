@@ -12,7 +12,7 @@ import {
 import { WorkflowCanvas } from "@/components/workflow";
 import { WorkflowSidebar } from "@/components/workflow";
 import { useWorkflowStore } from "@/store";
-import { api } from "@/lib/api";
+import { api, workflowToolName } from "@/lib/api";
 import Button from "@/components/ui/Button";
 import Card, { CardTitle, CardDescription, CardFooter } from "@/components/ui/Card";
 import Badge from "@/components/ui/Badge";
@@ -31,7 +31,8 @@ export default function WorkflowPage() {
     async function fetchWorkflows() {
       try {
         setLoading(true);
-        const res = await api.workflows.list();
+        const taskId = new URLSearchParams(window.location.search).get("task") || undefined;
+        const res = await api.workflows.list(taskId ? { taskId } : undefined);
         setWorkflows(res.data?.workflows || []);
       } catch (err: unknown) {
         toast.error(err instanceof Error ? err.message : "Failed to load workflows");
@@ -121,9 +122,9 @@ export default function WorkflowPage() {
               <CardDescription>{wf.description || "Custom AI workflow"}</CardDescription>
 
               <div className="flex flex-wrap gap-1.5 my-4">
-                {(wf.tools || []).slice(0, 5).map((tool: { id?: string; name?: string } | string) => (
-                  <Badge key={typeof tool === "string" ? tool : tool.id || tool.name} variant="primary" size="sm">
-                    {typeof tool === "string" ? tool : tool.name || tool.id}
+                {(wf.tools || []).slice(0, 5).map((tool, i) => (
+                  <Badge key={`${workflowToolName(tool)}-${i}`} variant="primary" size="sm">
+                    {workflowToolName(tool)}
                   </Badge>
                 ))}
               </div>
