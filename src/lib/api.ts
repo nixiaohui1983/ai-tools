@@ -80,6 +80,8 @@ export interface ArticleDTO {
   viewCount: number;
   publishedAt?: string;
   createdAt: string;
+  tools?: { tool: ToolDTO }[];
+  workflow?: { id: string; name: string; slug: string } | null;
 }
 
 // ============ API Client ============
